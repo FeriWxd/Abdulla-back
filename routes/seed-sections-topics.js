@@ -1,0 +1,211 @@
+// backend/seed-sections-topics.js
+require("dotenv").config();
+const mongoose = require("mongoose");
+
+const Section = require("./models/Section");
+const Topic   = require("./models/Topic");
+
+// helpers
+const pad2 = (n) => String(n).padStart(2, "0");
+
+const CATALOG = [
+  {
+    category: "math", // (önceden sayisal)
+    sections: [
+      { name: "Natural ədədlər", topics: [
+        "Natural ədədlər. Natural ədədlərin onluq say sistemində yazılışı",
+        "Natural ədədlərin toplanması, çıxılması, vurulması və bölünməsi",
+        "Natural ədədlərin bölünmə əlamətləri. Qalıqlı bölmə",
+        "Natural ədədlərin sadə vuruqlara ayrılışı. Ən böyük ortaq bölən (ƏBOB).",
+        "Ən kiçik ortaq bölünən (ƏKOB)",
+      ]},
+      { name: "Adi və onluq kəsrlər", topics: [
+        "Adi və onluq kəsrlər. Adi və onluq kəsrlərin toplanması, çıxılması, vurulması və bölünməsi",
+        "Düzgün və düzgün olmayan kəsrlər. Sonsuz dövrü onluq kəsrlər.",
+        "Adi kəsrin onluq kəsrə çevrilməsi. Onluq kəsrin adi kəsrə çevrilməsi",
+        "Kəsrlərin müqayisəsi",
+        "Ədədin hissəsinin və hissəsinə görə ədədin tapılması",
+      ]},
+      { name: "Nisəbət. Tənasüb. Faiz.", topics: [
+        "Nisəbət. Tənasüb. Tənasübün xassələri. Düz və tərs mütənasiblik",
+        "Faiz. Ədədin faizinin tapılması",
+        "Faizinə görə ədədin tapılması. İki ədədin faiz nisbəti",
+        "Faizə aid məsələlər",
+      ]},
+      { name: "Həqiqi ədədlər", topics: [
+        "Rasional ədədlər. Rasional ədədlər üzərində əməliər",
+        "İrrasional ədədlər",
+        "Ədədin modulu. Modul daxil olan ifadələrin çevrilməsi",
+        "Ədədi orta. Həqiqi ədədlərin müqayisəsi",
+        "Ədədin tam və kəsr hissəsi. Ədədin standart şəkli",
+      ]},
+      { name: "Tam cəbri ifadələr", topics: [
+        "Birhədli və onun standart şəkli. Natural üstlü qüvvət",
+        "Çoxhədlilər və onlar üzərində əməliər",
+        "Müxtəsər vurma düsturları",
+        "İfadələrin ədədi qiymətlərinin hesablanması",
+        "İfadələrin ən kiçik və ən böyük qiymətlərinin tapılması",
+      ]},
+      { name: "Çoxhədlilinin vuruqlara ayrılması", topics: [
+        "Müxtəsər vurma düsturlarının köməyi ilə vuruqlara ayırma",
+        "Müxtəlif üsulların köməyi ilə vuruqlara ayırma",
+        "Vuruqlara ayırma üsulu ilə ifadələrin ədədi qiymətinin hesablanması",
+      ]},
+      { name: "Rasional kəsrlər", topics: [
+        "Kəsrlərin ixtisarı. DMQ çoxluğu",
+        "İfadələrin sadələşdirilməsi",
+        "İfadələrin ədədi qiymətlərinin tapılması",
+      ]},
+      { name: "Kvadrat köklər. Həqiqi üstlü qüvvət", topics: [
+        "Hesabi kvadrat kök və onun xassələri",
+        "n-ci dərəcədən kök. Həqiqi üstlü qüvvət və onun xassələri. Ədədlərin müqayisəsi",
+        "Kəsrlərin ixtisarı. İfadələrin sadələşdirilməsi və ədədi qiymətinin tapılması",
+      ]},
+      { name: "Birməchullu tənliklər və məsələlər", topics: [
+        "Xətti tənliklər",
+        "Kvadrat tənliklər və onların araşdırılması",
+        "Viyet teoremi və onun tərsi olan teorem",
+        "Rasional tənliklər",
+        "Modul işarəsi daxilində dəyişəni olan tənliklər. İrrasional tənliklər",
+        "Tənlik qurmaqla məsələlər həlli",
+      ]},
+      { name: "Tənliklər sistemi", topics: [
+        "Xətti tənliklər sistemi",
+        "Xətti tənliklər sisteminin həllinin araşdırılması",
+        "Biri birdərəcəli, digəri ikidərəcəli və daha yüksək dərəcəli olan tənliklər sistemi",
+        "Hər iki tənliyi ikidərəcəli və daha yüksək dərəcəli olan tənliklər sistemi",
+        "Tənliklər sistemi qurmaqla məsələlər həlli",
+      ]},
+      { name: "Bərabərsizliklər və bərabərsizliklər sistemi", topics: [
+        "Ədədi bərabərsizliklər və onların əsas xassələri",
+        "Birdəyişənli xətti bərabərsizliklər. Birdəyişənli xətti bərabərsizliklər sistemi",
+        "İkidərəcəli və yüksək dərəcəli bərabərsizliklər",
+        "Rasional bərabərsizliklər",
+        "Modul işarəsi daxilində dəyişəni olan bərabərsizliklər",
+        "Kvadrat bərabərsizliklər sistemi. İrrasional bərabərsizliklər",
+      ]},
+      { name: "Ədədi ardıcıllıqlar. Silsilələr", topics: [
+        "Ədədi ardıcıllıqlar",
+        "Ədədi silsilələr",
+        "Həndəsi silsilələr. Sonsuz həndəsi silsilənin cəmi (|q|<1).",
+        "Ədədi və həndəsi silsilələrə aid məsələlər",
+      ]},
+      { name: "Çoxluqlar", topics: [
+        "Çoxluqların birləşməsi, kəsişməsi, fərqi",
+        "Çoxluqların birləşməsi, kəsişməsi və fərqinin elementlərinin sayı",
+      ]},
+    ],
+  },
+  {
+    category: "geometry", // (önceden geometri)
+    sections: [
+      { name: "Həndəsənin əsas anlayışları", topics: [
+        "Düz xətt, şüa, parça. Parçaların ölçülməsi",
+        "Bucaq. Bucaqların ölçülməsi. Bucağın tənböləni",
+        "Qonşu və qarşılıqlı bucaqlar",
+        "İki paralel düz xəttin üçüncü ilə kəsişməsindən alınan bucaqlar",
+        "Uyğun tərəfləri paralel və perpendikulyar olan bucaqlar",
+      ]},
+      { name: "Üçbucaqlar", topics: [
+        "Üçbucaq. Üçbucaq bərabərsizliyi. Üçbucağın perimetri",
+        "Üçbucağın medianı, tənböləni, hündürlüyü. Medianların və tənbölənlərin xassəsi",
+        "Üçbucağın daxili bucaqlarının cəmi. Üçbucağın xarici bucağının xassəsi",
+        "Üçbucaqların kongruyentlik əlaməti. Fales teoremi. Üçbucağın orta xətti",
+        "Bərabəryanlı üçbucaqlar. Bərabərtərəfli üçbucaqlar",
+        "Düzbucaqlı üçbucaq. Pifaqor teoremi. Düzbucaqlı üçbucağın tərəfləri və bucaqları arasındakı münasibətlər",
+        "Sinuslar teoremi. Kosinuslar teoremi",
+      ]},
+      { name: "Çoxbucaqlılar. Dördbucaqlılar", topics: [
+        "Qabarıq çoxbucaqlı. Qabarıq çoxbucaqlının daxili və xarici bucaqlarının cəmi. Düzgün çoxbucaqlı",
+        "Paraleloqram, onun xassələri və əlamətləri",
+        "Düzbucaqlı, kvadrat, romb və onların xassələri",
+        "Trapesiya və onun orta xətti",
+      ]},
+      { name: "Çevrə və dairə", topics: [
+        "Çevrə. Dairə. Radius, diametr, vətər. Çevrənin və çevrə qövsünün uzunluğu. Çevrələrin qarşılıqlı vəziyyəti.",
+        "Mərkəzi bucaq. Daxilə çəkilmiş bucaq. Toxunanla vətər arasındakı bucaq",
+        "Çevrədə mütənasib parçalar. Toxunan və kəsənin xassələri",
+        "Çevrənin daxilinə və xaricinə çəkilmiş üçbucaqlar",
+        "Çevrənin daxilinı və xaricinə çəkilmiş çoxbucaqlılar",
+      ]},
+    ],
+  },
+];
+
+const padKey = (cat, i, j) => `${cat}-s${pad2(i+1)}-t${pad2(j+1)}`;
+const secKeyOf = (cat, i) => `${cat}-s${pad2(i+1)}`;
+
+async function upsertSection({ category, name, key, order }) {
+  let doc = await Section.findOne({ key });
+  if (!doc) doc = await Section.findOne({ name });
+  if (doc) {
+    doc.name = name;
+    doc.order = order;
+    doc.category = category;
+    if (!doc.key) doc.key = key;
+    await doc.save();
+    return doc;
+  }
+  return Section.create({ key, name, order, category });
+}
+
+async function upsertTopic({ sectionId, name, key, order }) {
+  let doc = await Topic.findOne({ key });
+  if (!doc) doc = await Topic.findOne({ sectionId, name });
+  if (doc) {
+    doc.sectionId = sectionId;
+    doc.name = name;
+    doc.order = order;
+    if (!doc.key) doc.key = key;
+    await doc.save();
+    return doc;
+  }
+  return Topic.create({ sectionId, key, name, order });
+}
+
+async function run() {
+  try {
+    if (!process.env.MONGO_URI) {
+      console.error("❌ MONGO_URI tapılmadı (.env)");
+      process.exit(1);
+    }
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB bağlantısı quruldu");
+
+    let secCount = 0, topicCount = 0;
+
+    for (const cat of CATALOG) {
+      for (let i = 0; i < cat.sections.length; i++) {
+        const sec = cat.sections[i];
+        const sDoc = await upsertSection({
+          category: cat.category,
+          name: sec.name.trim(),
+          key: secKeyOf(cat.category, i),
+          order: i + 1,
+        });
+        secCount++;
+
+        for (let j = 0; j < sec.topics.length; j++) {
+          const name = sec.topics[j].trim();
+          if (!name) continue;
+          await upsertTopic({
+            sectionId: sDoc._id,
+            name,
+            key: padKey(cat.category, i, j),
+            order: j + 1,
+          });
+          topicCount++;
+        }
+      }
+    }
+
+    console.log(`🎯 ${secCount} bölüm, ${topicCount} konu upsert edildi`);
+  } catch (err) {
+    console.error("❌ Xəta:", err);
+  } finally {
+    await mongoose.connection.close();
+    process.exit(0);
+  }
+}
+
+run();
