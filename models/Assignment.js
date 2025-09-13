@@ -23,4 +23,4 @@ AssignmentSchema.index({ dateKey: 1, groupNames: 1 });
 AssignmentSchema.index({ visibilityStartAt: 1, isPublished: 1 });
 AssignmentSchema.index({ dueAt: 1 });
 
-module.exports = mongoose.model("Assignment", AssignmentSchema);
+module.exports = mongoose.model("Assignment", AssignmentSchema)
